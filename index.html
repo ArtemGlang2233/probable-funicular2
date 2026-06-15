@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LastDepVPN</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #0f111a;
+            --card-bg: #161925;
+            --primary-blue: #2563eb;
+            --success-green: #10b981;
+            --text-main: #ffffff;
+            --text-gray: #828899;
+            --danger-red: #ef4444;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 16px;
+            padding-bottom: 90px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Шапка */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .logo-area span {
+            margin-right: 6px;
+        }
+
+        .menu-dots {
+            cursor: pointer;
+            padding: 8px;
+            font-size: 22px;
+            color: var(--text-gray);
+            line-height: 1;
+        }
+
+        /* Выпадающее меню 3-х точек */
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 40px;
+            right: 0;
+            background: var(--card-bg);
+            border: 1px solid #2a2f42;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            z-index: 100;
+            min-width: 190px;
+            overflow: hidden;
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 12px 16px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 14px;
+            border-bottom: 1px solid #2a2f42;
+        }
+
+        .dropdown-menu a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-menu a:hover {
+            background: #202436;
+        }
+        /* Баланс */
+        .balance-section {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .balance-label {
+            color: var(--text-gray);
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .balance-amount {
+            font-size: 36px;
+            font-weight: 800;
+        }
+
+        /* Кнопки */
+        .btn {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn:disabled {
+            background-color: #2b3045 !important;
+            color: var(--text-gray);
+            cursor: not-allowed;
+        }
+
+        /* Условия пользования под кнопкой */
+        .terms-link-btn {
+            background: transparent;
+            color: var(--text-gray);
+            border: none;
+            text-decoration: underline;
+            font-size: 13px;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto 20px auto;
+            text-align: center;
+        }
+
+        .secondary-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .btn-sec {
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            border: none;
+            border-radius: 14px;
+            padding: 14px;
+            font-size: 13px;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Устройства */
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .device-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .device-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .device-icon {
+            font-size: 24px;
+        }
+
+        .device-name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .device-meta {
+            color: var(--text-gray);
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 110, 0.1);
+            color: var(--danger-red);
+            border: none;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Тарифная сетка */
+        .tariff-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .tariff-card-btn {
+            background: linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%);
+            border: none;
+            border-radius: 14px;
+            padding: 16px;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .tariff-card-btn:hover {
+            opacity: 0.9;
+        }
+
+        .tariff-card-btn.back-btn {
+            background: linear-gradient(135deg, #c026d3 0%, #a21caf 100%);
+            margin-top: 5px;
+        }
+
+        /* Баннер */
+        .promo-banner {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .promo-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .promo-desc {
+            color: var(--text-gray);
+            font-size: 14px;
+        }
+
+        /* Навигация */
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--card-bg);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #2a2f42;
+            z-index: 99;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-gray);
+            font-size: 11px;
+            cursor: pointer;
+            text-decoration: none;
+            width: 25%;
+        }
+
+        .nav-item.active {
+            color: var(--primary-blue);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .profile-list {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .profile-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid #2a2f42;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+
+        .profile-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="main-tab" class="tab-content active">
+        <header>
+            <div class="logo-area">
+                <span>⚡</span> LastDepVPN
+            </div>
+            <div class="menu-dots" onclick="toggleDropdown(event)">⋮</div>
+            
+            <div id="dotsMenu" class="dropdown-menu">
+                <a href="#" onclick="alert('LastDepVPN v1.0.0 — Скоростной VPN.')">ℹ️ О сервисе</a>
+                <a href="https://telegra.ph/Usloviya-servisa-04-08" target="_blank">📖 Условия сервиса</a>
+                <a href="https://t.me/maxinatov" target="_blank">🛠 Тех. Поддержка</a>
+                <a href="#" onclick="location.reload()">🔄 Обновить страницу</a>
+            </div>
+        </header>
+
+        <div class="balance-section">
+            <div class="balance-label">Баланс</div>
+            <div id="balance-display" class="balance-amount">150 ₽</div>
+        </div>
+
+        <button id="connect-btn" class="btn" onclick="generateAndConnect()">
+            🚀 ПОДКЛЮЧИТЬ VPN
+        </button>
+
+        <a href="https://telegra.ph/Usloviya-servisa-04-08" target="_blank" class="terms-link-btn">📄 Условия пользования</a>
+        <div class="secondary-actions">
+            <button class="btn-sec" onclick="alert('Обещанный платёж взят!')">✋ Обещанный платёж</button>
+            <button class="btn-sec" onclick="alert('История платежей пуста')">🕒 История</button>
+        </div>
+
+        <div class="section-title">👇 Выберите необходимый срок подписки:</div>
+        <div class="tariff-grid">
+            <button class="tariff-card-btn" onclick="buySubscription(159, '1 мес.')">💎 1 мес. - 159 ₽ (+5 ГБ)</button>
+            <button class="tariff-card-btn" onclick="buySubscription(429, '3 мес.')">💎 3 мес. - 429 ₽ (+15 ГБ)</button>
+            <button class="tariff-card-btn" onclick="buySubscription(805, '6 мес.')">💎 6 мес. - 805 ₽ (+30 ГБ)</button>
+            <button class="tariff-card-btn" onclick="buySubscription(1610, '12 мес.')">💎 12 мес. - 1610 ₽ (+60 ГБ)</button>
+            <button class="tariff-card-btn back-btn" onclick="alert('Возврат в предыдущее меню')">Вернуться назад</button>
+        </div>
+
+        <div class="section-title">Мои устройства</div>
+        <div class="device-card">
+            <div class="device-info">
+                <div class="device-icon">📱</div>
+                <div>
+                    <div class="device-name">iPhone X</div>
+                    <div class="device-meta">V2RAYTUN • Срок до 01.07</div>
+                </div>
+            </div>
+            <button class="btn-delete" onclick="alert('Устройство удалено')">Удалить</button>
+        </div>
+
+        <div class="promo-banner">
+            <div class="promo-title">🤝 Пригласи друга</div>
+            <div class="promo-desc">и получи 50₽ на баланс за каждого</div>
+        </div>
+    </div>
+
+    <div id="cabinet-tab" class="tab-content">
+        <header>
+            <div class="logo-area">👤 Личный кабинет</div>
+        </header>
+        
+        <div class="profile-list">
+            <div class="profile-item">
+                <span>ID Пользователя:</span>
+                <span id="user-id-display" style="color:var(--text-gray)">#000000</span>
+            </div>
+            
+            <a href="https://t.me/maxinatov" target="_blank" class="profile-item">
+                <span>🛠 Служба поддержки LastDepVPN</span>
+                <span style="color:var(--primary-blue)">Написать 👉</span>
+            </a>
+            
+            <div class="profile-item">
+                <span>Язык интерфейса:</span>
+                <span style="color:var(--text-gray)">Русский</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="keys-tab" class="tab-content">
+        <header><div class="logo-area">🔑 Мои ключи</div></header>
+        <p style="color:var(--text-gray); text-align:center; margin-top: 40px;">Ключи генерируются автоматически.</p>
+    </div>
+    
+    <div id="refs-tab" class="tab-content">
+        <header><div class="logo-area">🎁 Рефералы</div></header>
+        <p style="color:var(--text-gray); text-align:center; margin-top: 40px;">Реферальная система активна.</p>
+    </div>
+
+    <nav>
+        <div class="nav-item active" onclick="switchTab('main-tab', this)">
+            <div class="nav-icon">🏠</div>
+            Главная
+        </div>
+        <div class="nav-item" onclick="switchTab('keys-tab', this)">
+            <div class="nav-icon">🔑</div>
+            Ключи
+        </div>
+        <div class="nav-item" onclick="switchTab('refs-tab', this)">
+            <div class="nav-icon">🎁</div>
+            Рефералы
+        </div>
+        <div class="nav-item" onclick="switchTab('cabinet-tab', this)">
+            <div class="nav-icon">👤</div>
+            Кабинет
+        </div>
+    </nav>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        let currentBalance = 150; 
+
+        function updateBalanceDisplay() {
+            document.getElementById('balance-display').innerText = currentBalance + ' ₽';
+        }
+
+        updateBalanceDisplay();
+        function buySubscription(price, planName) {
+            if (currentBalance >= price) {
+                const confirmBuy = confirm(`Вы уверены, что хотите приобрести тариф "${planName}" за ${price} ₽?`);
+                
+                if (confirmBuy) {
+                    currentBalance -= price;
+                    updateBalanceDisplay();
+                    alert(`✅ Подписка на ${planName} успешно активирована! Списано: ${price} ₽.`);
+                }
+            } else {
+                alert(`❌ На вашем балансе недостаточно средств.\n\nСтоимость тарифа: ${price} ₽\nВаш баланс: ${currentBalance} ₽\n\nПожалуйста, пополните счет.`);
+            }
+        }
+
+        const userId = tg.initDataUnsafe?.user?.id || "Не авторизован";
+        document.getElementById('user-id-display').innerText = userId !== "Не авторизован" ? `#${userId}` : userId;
+
+        async function generateAndConnect() {
+            const btn = document.getElementById('connect-btn');
+            
+            btn.innerHTML = "⏳ Генерируем ключ...";
+            btn.style.background = "#2b3045";
+            btn.disabled = true;
+
+            const tgUserId = tg.initDataUnsafe?.user?.id || "guest_user";
+
+            try {
+                const response = await fetch(`http://185.185.69.87:8000/generate_key?user_id=${tgUserId}`);
+                const data = await response.json();
+
+                if (data.success && data.link) {
+                    btn.innerHTML = "🚀 Открытие приложения...";
+                    btn.style.background = "#10b981";
+                    
+                    window.location.href = data.link;
+                } else {
+                    alert("Ошибка сервера при создании ключа. Проверьте бэкенд.");
+                }
+            } catch (error) {
+                console.error("Ошибка связи:", error);
+                alert("Не удалось связаться с бэкендом. Проверьте запуск Python-скрипта.");
+            } finally {
+                setTimeout(() => {
+                    btn.innerHTML = "🚀 ПОДКЛЮЧИТЬ VPN";
+                    btn.style.background = "#2563eb";
+                    btn.disabled = false;
+                }, 3000);
+            }
+        }
+
+        function toggleDropdown(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('dotsMenu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            el.classList.add('active');
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('.menu-dots')) {
+                const menu = document.getElementById('dotsMenu');
+                if (menu) menu.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
+
